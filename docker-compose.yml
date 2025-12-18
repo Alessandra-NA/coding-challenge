@@ -1,0 +1,69 @@
+services:
+  go-api:
+    build:
+      context: ./go-api
+      dockerfile: Dockerfile
+    container_name: interseguro-go-api
+    ports:
+      - "${API1_PORT:-8080}:8080"
+    environment:
+      - API1_PORT=8080
+      - JWT_SECRET=${JWT_SECRET:-development-secret-key-change-in-production}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-3600}
+      - API2_URL=${API2_URL:-http://node-api:3001}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - AUTH_USERNAME=${AUTH_USERNAME:-admin}
+      - AUTH_PASSWORD=${AUTH_PASSWORD:-admin123}
+    depends_on:
+      node-api:
+        condition: service_healthy
+    networks:
+      - interseguro-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  node-api:
+    build:
+      context: ./node-api
+      dockerfile: Dockerfile
+    container_name: interseguro-node-api
+    ports:
+      - "${API2_PORT:-3001}:${API2_PORT:-3001}"
+    environment:
+      - API2_PORT=${API2_PORT:-3001}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - NODE_ENV=production
+    networks:
+      - interseguro-network
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:' + (process.env.API2_PORT || '3001') + '/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})\""]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: interseguro-frontend
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    environment:
+      - API_BASE_URL=${API_BASE_URL:-http://localhost:8080}
+    depends_on:
+      - go-api
+    networks:
+      - interseguro-network
+    restart: unless-stopped
+
+networks:
+  interseguro-network:
+    driver: bridge
+

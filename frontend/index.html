@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interseguro Challenge - Matrix Rotator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔄 Matrix Rotator</h1>
+            <p class="subtitle">Rotación de Matriz 90° y Análisis Estadístico</p>
+        </header>
+
+        <!-- Login Section -->
+        <section id="loginSection" class="card">
+            <h2>Autenticación</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Usuario:</label>
+                    <input type="text" id="username" name="username" required placeholder="admin" value="admin">
+                </div>
+                <div class="form-group">
+                    <label for="password">Contraseña:</label>
+                    <input type="password" id="password" name="password" required placeholder="admin123" value="admin123">
+                </div>
+                <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+            </form>
+            <div id="loginError" class="error-message"></div>
+        </section>
+
+        <!-- Main Content (hidden until login) -->
+        <section id="mainSection" class="hidden">
+            <!-- Matrix Input Section -->
+            <div class="card">
+                <h2>Ingresar Matriz</h2>
+                <p class="help-text">Ingrese la matriz en formato JSON. Ejemplo: [[1,2,3],[4,5,6],[7,8,9]]</p>
+                <div class="form-group">
+                    <label for="matrixInput">Matriz (JSON):</label>
+                    <textarea 
+                        id="matrixInput" 
+                        rows="6" 
+                        placeholder='[[1,2,3],[4,5,6],[7,8,9]]'
+                        required></textarea>
+                </div>
+                <div id="copyNotification" class="copy-notification hidden">✓ Copiado al portapapeles</div>
+                <button id="rotateBtn" class="btn btn-primary">Rotar y Analizar</button>
+                <div id="rotateError" class="error-message"></div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" class="hidden">
+                <!-- Original Matrix -->
+                <div class="card">
+                    <h3>Matriz Original</h3>
+                    <div id="originalMatrix" class="matrix-display"></div>
+                    <div class="diagonal-info" id="originalDiagonalInfo"></div>
+                </div>
+
+                <!-- Rotated Matrix -->
+                <div class="card">
+                    <h3>Matriz Rotada (90° Horario)</h3>
+                    <div id="rotatedMatrix" class="matrix-display"></div>
+                    <div class="diagonal-info" id="rotatedDiagonalInfo"></div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="card">
+                    <h3>Estadísticas</h3>
+                    <div id="statistics" class="statistics-display"></div>
+                    <div class="processing-info">
+                        <small>Tiempo de procesamiento: <span id="processingTime">-</span> ms</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Procesando matriz...</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
