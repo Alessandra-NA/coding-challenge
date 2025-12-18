@@ -36,6 +36,7 @@ Este proyecto consiste en tres componentes principales:
 - **Docker** y **Docker Compose** (recomendado)
 - **Go** 1.21+ (para desarrollo local sin Docker)
 - **Node.js** 20+ y npm (para desarrollo local sin Docker)
+- Cuenta de **Google Cloud** con permisos de Cloud Run
 
 ## 📦 Instalación y Ejecución con Docker
 
@@ -213,6 +214,71 @@ curl -X POST http://localhost:8080/rotate \
 - **Escalabilidad independiente** → Cada servicio escala según su carga
 - **Aislamiento** → Fallo en un servicio no afecta los demás
 - **Serverless** → Cloud Run maneja infraestructura, HTTPS gratis, pago por uso
+
+## 🚀 Instrucciones de Despliegue
+
+Los microservicios se desplegaron usando **gcloud run deploy** desde el código fuente.
+
+### Requisitos
+- Google Cloud SDK instalado
+- Proyecto configurado (`gcloud config set project <PROJECT_ID>`)
+- Cloud Run y Cloud Build habilitados
+
+### Orden de despliegue
+1. node-api  
+2. go-api  
+3. frontend  
+
+### node-api
+```bash
+gcloud run deploy node-api \
+  --source ./node-api \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 3001 \
+  --set-env-vars "API2_PORT=3001,LOG_LEVEL=info,NODE_ENV=production" \
+  --memory 512Mi \
+  --cpu 1 \
+  --timeout 300 \
+  --max-instances 10 \
+  --min-instances 0
+```
+
+### go-api
+```bash
+gcloud run deploy go-api \
+  --source ./go-api \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 8080 \
+  --set-env-vars "API1_PORT=8080,API2_URL=https://node-api-16817262424.us-central1.run.app,JWT_SECRET=<JWT_SECRET>,JWT_EXPIRATION=3600,LOG_LEVEL=info,AUTH_USERNAME=<AUTH_USERNAME>,AUTH_PASSWORD=<AUTH_PASSWORD>" \
+  --memory 512Mi \
+  --cpu 1 \
+  --timeout 300 \
+  --max-instances 10 \
+  --min-instances 0
+```
+
+### frontend
+```bash
+gcloud run deploy frontend \
+  --source ./frontend \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated \
+  --port 8080 \
+  --set-env-vars "API_BASE_URL=https://go-api-16817262424.us-central1.run.app" \
+  --memory 256Mi \
+  --cpu 1 \
+  --timeout 300 \
+  --max-instances 10 \
+  --min-instances 0
+```
+
+> Nota: Reemplazar las URLs por las generadas en tu proyecto de GCP.
+
 
 ## 📝 Notas de Desarrollo
 
